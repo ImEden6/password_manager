@@ -19,12 +19,15 @@
 
 # VS Code related
 .vscode/
+*.code-workspace
 
 # Flutter/Dart/Pub related
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
+.packages
 .pub-cache/
 .pub/
 /build/
@@ -36,7 +39,22 @@
 **/android/app/debug/
 **/android/app/profile/
 **/android/app/release/
+**/android/app/*.jks
+**/android/app/*.keystore
 /android/local.properties
+.gradle/
+
+# iOS/macOS related (Even if not currently active, it's good to have)
+**/ios/Flutter/Generated.xcconfig
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/ServiceDefinitions.json
+**/ios/Runner/GeneratedPluginRegistrant.*
+**/ios/.last_build_id
+**/ios/.generated/
+
+# Project-specific Design Assets (Intermediate files)
+blue_shield_icon.png
+ie6_shield_icon.png
 
 # Symbolication / Obfuscation
 app.*.symbols
