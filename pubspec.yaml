@@ -1,0 +1,41 @@
+name: password_manager
+description: "A secure password manager app for UCCD3223 Mobile Applications Development."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.10.8
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.8
+  sqflite: ^2.4.2
+  path: ^1.9.1
+  encrypt: ^5.0.3
+  flutter_secure_storage: ^9.2.4
+  local_auth: ^2.3.0
+  crypto: ^3.0.6
+  provider: ^6.1.5
+  flutter_slidable: ^3.1.1
+  google_fonts: ^6.2.1
+  file_picker: ^8.1.7
+  csv: ^6.0.0
+  share_plus: ^10.1.4
+  dynamic_color: ^1.8.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/icons/launcher_icon.png"
+  adaptive_icon_background: "#0078D7"
+  adaptive_icon_foreground: "assets/icons/launcher_icon.png"
+
+flutter:
+  uses-material-design: true
