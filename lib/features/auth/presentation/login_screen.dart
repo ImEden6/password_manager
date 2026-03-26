@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import '../data/auth_service.dart';
+import '../../../shared/widgets/numeric_keypad.dart';
+
 
 /// Login screen with PIN entry, biometric auth, and lockout countdown.
 ///
@@ -34,18 +36,9 @@ class _LoginScreenState extends State<LoginScreen> {
   void initState() {
     super.initState();
     _pinController = TextEditingController();
-    _focusNode = FocusNode();
     _checkLockout();
     
-    // Explicitly request focus after the first frame to ensure keyboard shows up.
-    // This is more robust than just 'autofocus: true' on Android 15.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted && !_isLockedOut) {
-        _focusNode.requestFocus();
-      }
-    });
-
-    // Delay biometric attempt slightly to avoid focus collision on startup.
+    // Delay biometric attempt slightly relative to startup.
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted) _attemptBiometric();
     });
@@ -55,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void dispose() {
     _lockTimer?.cancel();
     _pinController.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -84,7 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
           _remainingLockSeconds = 0;
           _error = null;
         });
-        _focusNode.requestFocus();
       } else {
         setState(() => _remainingLockSeconds = remaining);
       }
@@ -162,53 +153,32 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 32),
 
               // PIN dots.
-              GestureDetector(
-                onTap: () => _focusNode.requestFocus(),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    8,
-                    (i) => AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: i < _pin.length
-                            ? (_error != null
-                                ? theme.colorScheme.error
-                                : theme.colorScheme.primary)
-                            : theme.colorScheme.surfaceContainerHighest,
-                        border: i < _pin.length
-                            ? null
-                            : Border.all(
-                                color: theme.colorScheme.outline, width: 1.5),
-                      ),
+              // PIN dots.
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  8,
+                  (i) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i < _pin.length
+                          ? (_error != null
+                              ? theme.colorScheme.error
+                              : theme.colorScheme.primary)
+                          : theme.colorScheme.surfaceContainerHighest,
+                      border: i < _pin.length
+                          ? null
+                          : Border.all(
+                              color: theme.colorScheme.outline, width: 1.5),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Hidden TextField to trigger native numeric keyboard.
-              SizedBox(
-                height: 0,
-                width: 0,
-                child: TextField(
-                  controller: _pinController,
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  showCursor: false, // Hidden but focusable
-                  enableInteractiveSelection: false,
-
-                  keyboardType: TextInputType.number,
-                  maxLength: 8,
-                  onChanged: (v) => setState(() => _pin = v),
-                  onSubmitted: (_) => _onSubmit(),
-                  decoration: const InputDecoration(counterText: ''),
-                ),
-              ),
 
               // Error or lockout message.
               AnimatedSwitcher(
@@ -235,40 +205,41 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const Spacer(),
 
-              // Submit + biometric buttons row.
-              Row(
-                children: [
-                  // Biometric button.
-                  FutureBuilder<bool>(
-                    future: widget.authService.isBiometricEnabled(),
-                    builder: (context, snapshot) {
-                      if (snapshot.data != true) return const SizedBox.shrink();
-                      return Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: IconButton.filled(
-                          icon: const Icon(Icons.fingerprint),
-                          iconSize: 32,
-                          onPressed: _isLockedOut ? null : _attemptBiometric,
-                          style: IconButton.styleFrom(
-                            minimumSize: const Size(56, 56),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-
-                  Expanded(
-                    child: SizedBox(
-                      height: 56,
-                      child: FilledButton(
-                        onPressed:
-                            (!_isLockedOut && _pin.length >= 4) ? _onSubmit : null,
-                        child: const Text('Unlock'),
-                      ),
-                    ),
-                  ),
-                ],
+              // Custom Numeric Keypad with Biometrics.
+              NumericKeypad(
+                onDigitTap: (digit) {
+                  if (!_isLockedOut && _pin.length < 8) {
+                    setState(() {
+                      _pin += digit;
+                      _error = null;
+                    });
+                  }
+                },
+                onDeleteTap: () {
+                  if (_pin.isNotEmpty) {
+                    setState(() {
+                      _pin = _pin.substring(0, _pin.length - 1);
+                      _error = null;
+                    });
+                  }
+                },
+                leadingAction: FutureBuilder<bool>(
+                  future: widget.authService.isBiometricEnabled(),
+                  builder: (context, snapshot) {
+                    if (snapshot.data != true) return const SizedBox.shrink();
+                    return IconButton(
+                      icon: const Icon(Icons.fingerprint),
+                      iconSize: 32,
+                      onPressed: _isLockedOut ? null : _attemptBiometric,
+                    );
+                  },
+                ),
+                onDoneTap: _onSubmit,
+                isDoneEnabled: !_isLockedOut && _pin.length >= 4,
               ),
+
+              const SizedBox(height: 24),
+
             ],
           ),
         ),

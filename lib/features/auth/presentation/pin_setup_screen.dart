@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../data/auth_service.dart';
+import '../../../shared/widgets/numeric_keypad.dart';
+
 
 /// PIN setup screen shown on first launch.
 ///
@@ -21,7 +23,6 @@ class PinSetupScreen extends StatefulWidget {
 
 class _PinSetupScreenState extends State<PinSetupScreen> {
   late final TextEditingController _pinController;
-  late final FocusNode _focusNode;
   String _pin = '';
   String _confirmPin = '';
   bool _isConfirming = false;
@@ -31,20 +32,11 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
   void initState() {
     super.initState();
     _pinController = TextEditingController();
-    _focusNode = FocusNode();
-
-    // Explicitly request focus after the first frame.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        _focusNode.requestFocus();
-      }
-    });
   }
 
   @override
   void dispose() {
     _pinController.dispose();
-    _focusNode.dispose();
     super.dispose();
   }
 
@@ -69,7 +61,6 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
         _isConfirming = true;
         _pinController.clear();
       });
-      _focusNode.requestFocus();
       return;
     }
 
@@ -79,7 +70,6 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
         _confirmPin = '';
         _pinController.clear();
       });
-      _focusNode.requestFocus();
       return;
     }
 
@@ -123,50 +113,28 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
               const SizedBox(height: 32),
 
               // PIN dots.
-              GestureDetector(
-                onTap: () => _focusNode.requestFocus(),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(
-                    8,
-                    (i) => Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 6),
-                      width: 16,
-                      height: 16,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: i < currentPin.length
-                            ? theme.colorScheme.primary
-                            : theme.colorScheme.surfaceContainerHighest,
-                        border: i < currentPin.length
-                            ? null
-                            : Border.all(
-                                color: theme.colorScheme.outline, width: 1.5),
-                      ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: List.generate(
+                  8,
+                  (i) => Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 6),
+                    width: 16,
+                    height: 16,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: i < currentPin.length
+                          ? theme.colorScheme.primary
+                          : theme.colorScheme.surfaceContainerHighest,
+                      border: i < currentPin.length
+                          ? null
+                          : Border.all(
+                              color: theme.colorScheme.outline, width: 1.5),
                     ),
                   ),
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Hidden TextField to trigger native numeric keyboard.
-              SizedBox(
-                height: 0,
-                width: 0,
-                child: TextField(
-                  controller: _pinController,
-                  focusNode: _focusNode,
-                  autofocus: true,
-                  showCursor: false, // Hidden but functional
-                  enableInteractiveSelection: false,
-
-                  keyboardType: TextInputType.number,
-                  maxLength: 8,
-                  onChanged: _onChanged,
-                  onSubmitted: (_) => _onSubmit(),
-                  decoration: const InputDecoration(counterText: ''),
-                ),
-              ),
 
               if (_error != null)
                 Text(
@@ -178,15 +146,24 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
 
               const Spacer(),
 
-              // Submit button.
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: FilledButton(
-                  onPressed: currentPin.length >= 4 ? _onSubmit : null,
-                  child: Text(_isConfirming ? 'Confirm' : 'Next'),
-                ),
+              // Custom Numeric Keypad.
+              NumericKeypad(
+                onDigitTap: (digit) {
+                  if (currentPin.length < 8) {
+                    _onChanged(currentPin + digit);
+                  }
+                },
+                onDeleteTap: () {
+                  if (currentPin.isNotEmpty) {
+                    _onChanged(currentPin.substring(0, currentPin.length - 1));
+                  }
+                },
+                onDoneTap: currentPin.length >= 4 ? _onSubmit : null,
+                isDoneEnabled: currentPin.length >= 4,
               ),
+
+              const SizedBox(height: 24),
+
             ],
           ),
         ),

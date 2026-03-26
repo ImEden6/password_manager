@@ -6,6 +6,8 @@ import '../../../services/providers.dart';
 import '../data/models/password_entry.dart';
 import 'widgets/password_generator_dialog.dart';
 import 'widgets/password_strength_indicator.dart';
+import '../../../shared/widgets/numeric_input_field.dart';
+
 
 /// Add / Edit password entry screen.
 ///
@@ -203,15 +205,12 @@ class _EntryFormScreenState extends State<EntryFormScreen> {
             const SizedBox(height: 16),
 
             // PIN (optional).
-            TextFormField(
+            NumericInputField(
               controller: _pinCtrl,
-              decoration: const InputDecoration(
-                labelText: 'PIN (optional)',
-                prefixIcon: Icon(Icons.pin_outlined),
-              ),
-              keyboardType: TextInputType.number,
-              textInputAction: TextInputAction.next,
+              labelText: 'PIN (optional)',
+              prefixIcon: Icons.pin_outlined,
             ),
+
             const SizedBox(height: 16),
 
             // Notes / Security Q&A (optional).

@@ -8,7 +8,9 @@ import 'widgets/password_tile.dart';
 import 'widgets/search_bar_widget.dart';
 import 'entry_form_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
+import '../../../shared/widgets/numeric_input_field.dart';
 import '../../../core/constants.dart';
+
 
 /// Main screen showing the list of password entries.
 class HomeScreen extends StatefulWidget {
@@ -301,16 +303,12 @@ class _PinVerifyDialogState extends State<_PinVerifyDialog> {
     final authService = context.read<AuthService>();
     return AlertDialog(
       title: const Text('Verify Identity'),
-      content: TextField(
+      content: NumericInputField(
         controller: _pinController,
+        labelText: 'Enter your PIN',
         obscureText: true,
-        keyboardType: TextInputType.number,
-        maxLength: 8,
-        decoration: const InputDecoration(
-          labelText: 'Enter your PIN',
-          border: OutlineInputBorder(),
-        ),
       ),
+
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),

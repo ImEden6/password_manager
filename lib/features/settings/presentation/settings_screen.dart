@@ -8,6 +8,8 @@ import '../../passwords/data/database_service.dart';
 import '../../passwords/data/encryption_service.dart';
 import '../../../services/csv_import_service.dart';
 import '../../../services/providers.dart';
+import '../../../shared/widgets/numeric_input_field.dart';
+
 
 /// Settings screen with PIN management, biometrics, backup/import, and theme.
 class SettingsScreen extends StatefulWidget {
@@ -275,29 +277,20 @@ class _ChangePinDialogState extends State<_ChangePinDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          TextField(
+          NumericInputField(
             controller: _currentPinCtrl,
+            labelText: 'Current PIN',
             obscureText: true,
-            keyboardType: TextInputType.number,
-            maxLength: 8,
-            decoration: const InputDecoration(
-              labelText: 'Current PIN',
-              border: OutlineInputBorder(),
-            ),
           ),
           const SizedBox(height: 16),
-          TextField(
+          NumericInputField(
             controller: _newPinCtrl,
+            labelText: 'New PIN (4-8 digits)',
             obscureText: true,
-            keyboardType: TextInputType.number,
-            maxLength: 8,
-            decoration: const InputDecoration(
-              labelText: 'New PIN (4-8 digits)',
-              border: OutlineInputBorder(),
-            ),
           ),
         ],
       ),
+
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
