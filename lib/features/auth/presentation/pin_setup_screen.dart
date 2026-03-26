@@ -32,6 +32,13 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
     super.initState();
     _pinController = TextEditingController();
     _focusNode = FocusNode();
+
+    // Explicitly request focus after the first frame.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _focusNode.requestFocus();
+      }
+    });
   }
 
   @override
@@ -150,6 +157,9 @@ class _PinSetupScreenState extends State<PinSetupScreen> {
                   controller: _pinController,
                   focusNode: _focusNode,
                   autofocus: true,
+                  showCursor: false, // Hidden but functional
+                  enableInteractiveSelection: false,
+
                   keyboardType: TextInputType.number,
                   maxLength: 8,
                   onChanged: _onChanged,

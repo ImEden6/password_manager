@@ -36,7 +36,19 @@ class _LoginScreenState extends State<LoginScreen> {
     _pinController = TextEditingController();
     _focusNode = FocusNode();
     _checkLockout();
-    _attemptBiometric();
+    
+    // Explicitly request focus after the first frame to ensure keyboard shows up.
+    // This is more robust than just 'autofocus: true' on Android 15.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && !_isLockedOut) {
+        _focusNode.requestFocus();
+      }
+    });
+
+    // Delay biometric attempt slightly to avoid focus collision on startup.
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted) _attemptBiometric();
+    });
   }
 
   @override
@@ -187,6 +199,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   controller: _pinController,
                   focusNode: _focusNode,
                   autofocus: true,
+                  showCursor: false, // Hidden but focusable
+                  enableInteractiveSelection: false,
+
                   keyboardType: TextInputType.number,
                   maxLength: 8,
                   onChanged: (v) => setState(() => _pin = v),
